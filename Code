@@ -72,25 +72,24 @@ void loop() {
 
 
 
-
 /*
    function : animation()
 
               animation (
-                         hue_start ,               : the start hue
-                         hue_change ,              :
-                         hue_static ,              :
-                         hue_static_delete ,       :
-                         saturation_start ,        :
-                         brightness_start ,        :
-                         hue_background ,          :
-                         saturation_background ,   :
-                         brightness_background ,   :
-                         density ,                 :
-                         lenght ,                  :
-                         speed ,                   :
-                         delay_time ,              :
-                         runs ,                    :
+                         hue_start ,               : the starting hue (0-65536)                                                               ┐                                     
+                         hue_change ,              : the hue change (0 : no change , e.g. 10000)                                              │
+                         hue_static ,              : should the colors be static (true) or should they move (false)?                          │
+                         hue_static_delete ,       : should all static pixels move away (true) or should they get overpainted (false)?        │
+                         saturation_start ,        : the starting saturation (0-255)                                                          ┤
+                         brightness_start ,        : the starting brightness (0-255)                                                          ┘
+                         hue_background ,          : the background hue (0-65536)                                                             ┐
+                         saturation_background ,   : the background saturation (0-255)                                                        ┤
+                         brightness_background ,   : the background brightness (0-255)                                                        ┘
+                         density ,                 : how many background pixels? (e.g. 5 background pixels + 1 active pixels = density : 6)   
+                         lenght ,                  : the lenght of every color intervall (e.g. 3)
+                         speed ,                   : the jump of the pixels per tic (e.g. 2)
+                         delay_time ,              : the delay (1000 = 1s) between the tics (e.g. 10)
+                         runs ,                    : how many active pixels should spawn (e.g. 30)
                         )
 */
 
