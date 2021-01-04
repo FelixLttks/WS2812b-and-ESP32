@@ -55,3 +55,101 @@ void loop() {
 
   
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+   function : animation()
+
+              animation (
+                         hue_start ,               : the start hue
+                         hue_change ,              :
+                         hue_static ,              :
+                         hue_static_delete ,       :
+                         saturation_start ,        :
+                         brightness_start ,        :
+                         hue_background ,          :
+                         saturation_background ,   :
+                         brightness_background ,   :
+                         density ,                 :
+                         lenght ,                  :
+                         speed ,                   :
+                         delay_time ,              :
+                         runs ,                    :
+                        )
+*/
+
+
+
+void animation ( int hue_start , int hue_change , boolean hue_static , boolean hue_static_delete , int saturation_start , int brightness_start , int hue_background , int saturation_background , int brightness_background , int density , int lenght , int speed , int delay_time , int runs ) {
+  int hue_currentStart = hue_start;
+
+  if ( hue_static_delete ) {
+    for ( int pixel_index = 0 ; pixel_index < LED_COUNT ; pixel_index ++) {
+      sta[pixel_index] = 0; 
+    }
+  }
+
+  for ( int runs_index = 0 ; runs_index < runs ; runs_index ++) {
+
+    for ( int pixel_index = 0 ; pixel_index < lenght ; pixel_index ++) {
+      hue[pixel_index] = hue_currentStart;
+      sat[pixel_index] = saturation_start;
+      bri[pixel_index] = brightness_start;
+    }
+
+    for ( int density_index = 0 ; density_index < density ; density_index ++) {
+
+      for ( int pixel_index = 0 ; pixel_index < LED_COUNT ; pixel_index ++) {
+        pixels.setPixelColor ( pixel_index , pixels.gamma32 ( pixels.ColorHSV ( hue[pixel_index] , sat[pixel_index] , bri[pixel_index])));
+      }
+
+      pixels.show();
+
+      for ( int pixel_index = LED_COUNT - 1 ; pixel_index > 0 ; pixel_index --) {
+
+        hue[pixel_index] = hue [pixel_index - speed] + sta[pixel_index] * speed;
+        sat[pixel_index] = sat [pixel_index - speed];
+        bri[pixel_index] = bri [pixel_index - speed];
+        sta[pixel_index] = sta [pixel_index - speed];
+      }
+
+      for ( int background_index = 0 ; background_index < speed ; background_index ++) {
+        hue[background_index] =        hue_background;
+        sat[background_index] = saturation_background;
+        bri[background_index] = brightness_background;
+
+        if ( hue_static ) {
+          sta[background_index] = hue_change;
+        }
+        else {
+          sta[background_index] = 0;
+        }
+
+      }
+
+      delay ( delay_time );
+    }
+
+    if ( !hue_static ) {
+      hue_currentStart += hue_change;
+    }
+
+  }
+
+}
