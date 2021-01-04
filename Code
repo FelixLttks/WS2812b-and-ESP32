@@ -1,0 +1,57 @@
+#include <Adafruit_NeoPixel.h>
+
+#define PIN 15
+#define LED_COUNT 300
+
+Adafruit_NeoPixel pixels = Adafruit_NeoPixel(LED_COUNT, PIN, NEO_GRB + NEO_KHZ800);
+
+int hue [LED_COUNT];   //all hue        in an array  
+int sat [LED_COUNT];   //all saturation in an array 
+int bri [LED_COUNT];   //all brightness in an array 
+int sta [LED_COUNT];   //all static     in an array
+
+void setup() {
+  Serial.begin(115200);
+  pixels.begin();
+
+  for ( int i = 0 ; i < LED_COUNT ; i++) {
+    hue[i] = 0;
+    sat[i] = 0;
+    bri[i] = 0;
+    sta[i] = 1;
+  }
+  
+}
+
+
+
+void loop() {
+  /*
+  animation (    0,   0,false,false,255,255,    0,255,  0,  1,  1,  1, 10,300);
+  animation (20000,   0,false,false,255,255,    0,255,  0,  1,  1,  1, 10,300);
+  animation (40000,   0,false,false,255,255,    0,255,  0,  1,  1,  1, 10,100);
+  animation (    0,   0,false,false,255,255,    0,255,  0,  5,  1,  1, 10, 20);
+  animation (20000,   0,false,false,255,255,    0,255,  0,  5,  1,  1,  0, 20);
+  animation (40000,   0,false,false,255,255,    0,255,  0,  5,  1,  2,  0, 20);
+  animation (    0,   0,false,false,255,255,20000,255,255,  5,  1,  1,  5, 20);
+  animation (    0,   0,false,false,255,255,20000,255, 50,  5,  1,  1,  5, 20);
+  animation (    0,   0,false,false,255,  0,    0,255,  0,  1,  1,  1,  5,300);
+  animation (20000,   0,false,false,255, 50,    0,255,  0,  1,  1,  1,  5,300);
+  animation (    0,   0,false,false,  0,255,20000,255, 50,  3,  1,  1,  5,100);
+  animation (    0,   0,false,false,255,  0,    0,255,  0,  1,  1,  1,  5,300);
+  animation (    0,1000,false,false,255,255,    0,255,  0,  1,  1,  1,  5,300);
+  animation (    0,   0,false,false,255,255,    0,255,  0,  1,300,  1,  0,  1);
+  animation (    0,1000, true,false,255,255,    0,255,  0,  1,  1,  1,  5,300);
+  animation (    0,   0,false,false,255,  0,    0,255,  0,  1,  1,  1,  5,300);
+  animation (40000,   0,false,false,255,255,    0,255,  0,  1, 10, 10,100, 30);
+  */
+  
+  animation (    0,1000,false,false,255,255,    0,255,  0,  1,  1,  1,  5,300);
+  animation (    0,   0,false,false,255,  0,    0,255,  0,  1,  1,  1,  5,300);
+  animation (    0,1000, true,false,255,255,    0,255,  0,  1,  1,  1,  5,300);
+  animation (    0,   0,false,false,255,  0,    0,255,  0,  1,  1,  1,  5,300);
+  animation (    0,1000, true,false,255,255,    0,255,  0,  1,  1,  1,  5,300);
+  animation (    0,   0,false, true,255,  0,    0,255,  0,  1,  1,  1,  5,300);
+
+  
+}
