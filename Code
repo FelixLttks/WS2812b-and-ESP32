@@ -1,3 +1,14 @@
+/*
+ *                WS2812b controlled by ESP32 with IR remote control
+ *                
+ *      author  : Felixpointexe https://github.com/Felixpointexe
+ *      credits : Adafruit https://www.adafruit.com/ for Adafruit_NeoPixel libary
+ *      
+ *      feel free to use it!
+ * 
+ * 
+ */
+
 #include <Adafruit_NeoPixel.h>
 #include "IRremote.h"
 
