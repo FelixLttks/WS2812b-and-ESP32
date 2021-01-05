@@ -1,18 +1,39 @@
 #include <Adafruit_NeoPixel.h>
+#include "IRremote.h"
 
 #define PIN 15
 #define LED_COUNT 300
+const int receiver = 23;
 
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(LED_COUNT, PIN, NEO_GRB + NEO_KHZ800);
+IRrecv irrecv(receiver);
+decode_results results;
 
-int hue [LED_COUNT];   //all hue        in an array  
-int sat [LED_COUNT];   //all saturation in an array 
-int bri [LED_COUNT];   //all brightness in an array 
+int hue [LED_COUNT];   //all hue        in an array
+int sat [LED_COUNT];   //all saturation in an array
+int bri [LED_COUNT];   //all brightness in an array
 int sta [LED_COUNT];   //all static     in an array
+
+int lastButton = 0;
+
+int settings [10][14] = {
+  {    0,     0, 0, 0, 255,   0,    0, 255,  0,   1,   1,  1, 10, 300 },   //0
+  {    0,   100, 0, 0, 255, 255,    0, 255,  0,   1,   1,  1, 10, 655 },   //1
+  {    0,   400, 0, 0, 255, 255,    0, 255,  0,   3,   1,  1, 20, 164 },   //2
+  {    0,  2000, 0, 0, 255, 255,    0, 255,  0,   1,   1,  1, 10,  66 },   //3
+  {    0,   700, 1, 0, 255, 255,    0, 255,  0, 100,  20,  1,  0,  20 },   //4
+  {    0,     0, 0, 0,   0, 255,    0, 255,  0,   1, 300,  1,  0,   1 },   //5
+  {    0,     0, 0, 0, 255, 255,    0, 255,  0, 200,  20,  1,  0,  20 },   //6
+  {    0, 40000, 0, 0, 255, 255,    0,   0, 30,  60,   1,  1,  0,  60 },   //7
+  {    0,     0, 0, 0, 255,   0,    0, 255,  0,   1,   1,  1, 10, 300 },   //8
+  {    0,     0, 0, 0, 255,   0,    0, 255,  0,   1,   1,  1, 10, 300 }    //9
+};
+
 
 void setup() {
   Serial.begin(115200);
   pixels.begin();
+  irrecv.enableIRIn();
 
   for ( int i = 0 ; i < LED_COUNT ; i++) {
     hue[i] = 0;
@@ -20,40 +41,20 @@ void setup() {
     bri[i] = 0;
     sta[i] = 1;
   }
-  
+
 }
 
-
-
 void loop() {
-  /*
-  animation (    0,   0,false,false,255,255,    0,255,  0,  1,  1,  1, 10,300);
-  animation (20000,   0,false,false,255,255,    0,255,  0,  1,  1,  1, 10,300);
-  animation (40000,   0,false,false,255,255,    0,255,  0,  1,  1,  1, 10,100);
-  animation (    0,   0,false,false,255,255,    0,255,  0,  5,  1,  1, 10, 20);
-  animation (20000,   0,false,false,255,255,    0,255,  0,  5,  1,  1,  0, 20);
-  animation (40000,   0,false,false,255,255,    0,255,  0,  5,  1,  2,  0, 20);
-  animation (    0,   0,false,false,255,255,20000,255,255,  5,  1,  1,  5, 20);
-  animation (    0,   0,false,false,255,255,20000,255, 50,  5,  1,  1,  5, 20);
-  animation (    0,   0,false,false,255,  0,    0,255,  0,  1,  1,  1,  5,300);
-  animation (20000,   0,false,false,255, 50,    0,255,  0,  1,  1,  1,  5,300);
-  animation (    0,   0,false,false,  0,255,20000,255, 50,  3,  1,  1,  5,100);
-  animation (    0,   0,false,false,255,  0,    0,255,  0,  1,  1,  1,  5,300);
-  animation (    0,1000,false,false,255,255,    0,255,  0,  1,  1,  1,  5,300);
-  animation (    0,   0,false,false,255,255,    0,255,  0,  1,300,  1,  0,  1);
-  animation (    0,1000, true,false,255,255,    0,255,  0,  1,  1,  1,  5,300);
-  animation (    0,   0,false,false,255,  0,    0,255,  0,  1,  1,  1,  5,300);
-  animation (40000,   0,false,false,255,255,    0,255,  0,  1, 10, 10,100, 30);
-  */
-  
-  animation (    0,1000,false,false,255,255,    0,255,  0,  1,  1,  1,  5,300);
-  animation (    0,   0,false,false,255,  0,    0,255,  0,  1,  1,  1,  5,300);
-  animation (    0,1000, true,false,255,255,    0,255,  0,  1,  1,  1,  5,300);
-  animation (    0,   0,false,false,255,  0,    0,255,  0,  1,  1,  1,  5,300);
-  animation (    0,1000, true,false,255,255,    0,255,  0,  1,  1,  1,  5,300);
-  animation (    0,   0,false, true,255,  0,    0,255,  0,  1,  1,  1,  5,300);
+  animation ( settings[lastButton][0] , settings[lastButton][1] , settings[lastButton][2] , settings[lastButton][3] , settings[lastButton][4] , settings[lastButton][5] , settings[lastButton][6] , settings[lastButton][7] , settings[lastButton][8] , settings[lastButton][9] , settings[lastButton][10] , settings[lastButton][11] , settings[lastButton][12] , settings[lastButton][13] );
 
-  
+  if (irrecv.decode(&results)) {
+    translateIR();
+    irrecv.resume();
+  }
+
+
+
+
 }
 
 
@@ -76,7 +77,7 @@ void loop() {
    function : animation()
 
               animation (
-                         hue_start ,               : the starting hue (0-65536)                                                               ┐                                     
+                         hue_start ,               : the starting hue (0-65536)                                                               ┐
                          hue_change ,              : the hue change (0 : no change , e.g. 10000)                                              │
                          hue_static ,              : should the colors be static (true) or should they move (false)?                          │
                          hue_static_delete ,       : should all static pixels move away (true) or should they get overpainted (false)?        │
@@ -85,7 +86,7 @@ void loop() {
                          hue_background ,          : the background hue (0-65536)                                                             ┐
                          saturation_background ,   : the background saturation (0-255)                                                        ┤
                          brightness_background ,   : the background brightness (0-255)                                                        ┘
-                         density ,                 : how many background pixels? (e.g. 5 background pixels + 1 active pixels = density : 6)   
+                         density ,                 : how many background pixels? (e.g. 5 background pixels + 1 active pixels = density : 6)
                          lenght ,                  : the lenght of every color intervall (e.g. 3)
                          speed ,                   : the jump of the pixels per tic (e.g. 2)
                          delay_time ,              : the delay (1000 = 1s) between the tics (e.g. 10)
@@ -95,12 +96,12 @@ void loop() {
 
 
 
-void animation ( int hue_start , int hue_change , boolean hue_static , boolean hue_static_delete , int saturation_start , int brightness_start , int hue_background , int saturation_background , int brightness_background , int density , int lenght , int speed , int delay_time , int runs ) {
+void animation ( int hue_start , int hue_change , int hue_static , int hue_static_delete , int saturation_start , int brightness_start , int hue_background , int saturation_background , int brightness_background , int density , int lenght , int speed , int delay_time , int runs ) {
   int hue_currentStart = hue_start;
 
-  if ( hue_static_delete ) {
+  if ( hue_static_delete == 1) {
     for ( int pixel_index = 0 ; pixel_index < LED_COUNT ; pixel_index ++) {
-      sta[pixel_index] = 0; 
+      sta[pixel_index] = 0;
     }
   }
 
@@ -133,7 +134,7 @@ void animation ( int hue_start , int hue_change , boolean hue_static , boolean h
         sat[background_index] = saturation_background;
         bri[background_index] = brightness_background;
 
-        if ( hue_static ) {
+        if ( hue_static == 1 ) {
           sta[background_index] = hue_change;
         }
         else {
@@ -141,14 +142,120 @@ void animation ( int hue_start , int hue_change , boolean hue_static , boolean h
         }
 
       }
-
+      if (irrecv.decode(&results)) {
+        translateIR();
+        irrecv.resume();
+        return;
+      }
+      
       delay ( delay_time );
     }
 
-    if ( !hue_static ) {
+    if ( hue_static == 0 ) {
       hue_currentStart += hue_change;
     }
 
   }
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+void translateIR() {
+
+  switch (results.value) {
+    case 0xFFA25D:
+      Serial.println("POWER");
+      break;
+    case 0xFFE21D:
+      Serial.println("FUNC/STOP");
+      break;
+    case 0xFF629D:
+      Serial.println("VOL+");
+      break;
+    case 0xFF22DD:
+      Serial.println("FAST BACK");
+      break;
+    case 0xFF02FD:
+      Serial.println("PAUSE");
+      break;
+    case 0xFFC23D:
+      Serial.println("FAST FORWARD");
+      break;
+    case 0xFFE01F:
+      Serial.println("DOWN");
+      break;
+    case 0xFFA857:
+      Serial.println("VOL-");
+      break;
+    case 0xFF906F:
+      Serial.println("UP");
+      break;
+    case 0xFF9867:
+      Serial.println("EQ");
+      break;
+    case 0xFFB04F:
+      Serial.println("ST/REPT");
+      break;
+    case 0xFF6897:
+      Serial.println("0");
+      lastButton = 0;
+      break;
+    case 0xFF30CF:
+      Serial.println("1");
+      lastButton = 1;
+      break;
+    case 0xFF18E7:
+      Serial.println("2");
+      lastButton = 2;
+      break;
+    case 0xFF7A85:
+      Serial.println("3");
+      lastButton = 3;
+      break;
+    case 0xFF10EF:
+      Serial.println("4");
+      lastButton = 4;
+      break;
+    case 0xFF38C7:
+      Serial.println("5");
+      lastButton = 5;
+      break;
+    case 0xFF5AA5:
+      Serial.println("6");
+      lastButton = 6;
+      break;
+    case 0xFF42BD:
+      Serial.println("7");
+      lastButton = 7;
+      break;
+    case 0xFF4AB5:
+      Serial.println("8");
+      lastButton = 8;
+      break;
+    case 0xFF52AD:
+      Serial.println("9");
+      lastButton = 9;
+      break;
+    case 0xFFFFFFFF:
+      Serial.println(" REPEAT");
+      break;
+
+    default:
+      Serial.print(" other button   ");
+      Serial.println(results.value);
+
+  }
+
+} 
