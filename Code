@@ -1,24 +1,29 @@
 /*
- *                WS2812b controlled by ESP32 with IR remote control
- *                
- *      author  : Felixpointexe https://github.com/Felixpointexe
- *      credits : Adafruit https://www.adafruit.com/ for Adafruit_NeoPixel libary
- *      
- *      feel free to use it!
- * 
- * 
- */
+                  WS2812b controlled by ESP32 with IR remote control
 
-#include <Adafruit_NeoPixel.h>
+        author  : Felixpointexe https://github.com/Felixpointexe
+        
+
+        feel free to use it!
+
+
+*/
+
+#include <Adafruit_NeoPixel.h>    //https://learn.adafruit.com/adafruit-neopixel-uberguide/arduino-library-use
 #include "IRremote.h"
+#include <U8x8lib.h>
+#include <SPI.h>
+#include <Wire.h>
 
 #define PIN 15
-#define LED_COUNT 300
-const int receiver = 23;
+#define LED_COUNT 300   //5m * 60 leds/m = 300 leds 
+const int receiver = 0;
 
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(LED_COUNT, PIN, NEO_GRB + NEO_KHZ800);
 IRrecv irrecv(receiver);
 decode_results results;
+
+U8X8_SH1106_128X64_NONAME_HW_I2C u8x8(/* reset=*/ U8X8_PIN_NONE);
 
 int hue [LED_COUNT];   //all hue        in an array
 int sat [LED_COUNT];   //all saturation in an array
@@ -27,17 +32,18 @@ int sta [LED_COUNT];   //all static     in an array
 
 int lastButton = 0;
 
-int settings [10][14] = {
-  {    0,     0, 0, 0, 255,   0,    0, 255,  0,   1,   1,  1, 10, 300 },   //0
-  {    0,   100, 0, 0, 255, 255,    0, 255,  0,   1,   1,  1, 10, 655 },   //1
-  {    0,   400, 0, 0, 255, 255,    0, 255,  0,   3,   1,  1, 20, 164 },   //2
-  {    0,  2000, 0, 0, 255, 255,    0, 255,  0,   1,   1,  1, 10,  66 },   //3
-  {    0,   700, 1, 0, 255, 255,    0, 255,  0, 100,  20,  1,  0,  20 },   //4
-  {    0,     0, 0, 0,   0, 255,    0, 255,  0,   1, 300,  1,  0,   1 },   //5
-  {    0,     0, 0, 0, 255, 255,    0, 255,  0, 200,  20,  1,  0,  20 },   //6
-  {    0, 40000, 0, 0, 255, 255,    0,   0, 30,  60,   1,  1,  0,  60 },   //7
-  {    0,     0, 0, 0, 255,   0,    0, 255,  0,   1,   1,  1, 10, 300 },   //8
-  {    0,     0, 0, 0, 255,   0,    0, 255,  0,   1,   1,  1, 10, 300 }    //9
+int settings [11][14] = {
+  {    0,     0, 0, 0, 255,   0,    0, 255,  0,    1,   1,  1, 10, 300 },   //0
+  {    0,   100, 0, 0, 255, 255,    0, 255,  0,    1,   1,  1, 10, 655 },   //1
+  {    0,   400, 0, 0, 255, 255,    0, 255,  0,    3,   1,  1, 20, 164 },   //2
+  {    0,  2000, 0, 0, 255, 255,    0, 255,  0,    1,   1,  1, 10,  66 },   //3
+  {    0,   700, 1, 0, 255, 255,    0, 255,  0,  100,  20,  1,  0,  20 },   //4
+  {    0,     0, 0, 0,   0, 255,    0, 255,  0,    1, 300,  1,  0,   1 },   //5
+  {    0, 50000, 0, 0, 255, 255,    0, 255,  0,    2,  20, 20,500,  20 },   //6
+  {    0, 40000, 0, 0, 255, 255,    0,   0, 30,   60,   1,  1,  0,  60 },   //7
+  {    0,   700, 0, 0, 255, 255,    0, 255,  0,    1,   1,  3, 10, 100 },   //8
+  {    0, 40000, 0, 0, 255, 255,    0, 255,  0,  150,   1,  2,  0,  10 },   //9
+  {    0,     0, 0, 0,   0, 255,    0, 255,  0, 9999,  10,  4,  0,  10 }    //FUNC/STOP
 };
 
 
@@ -46,7 +52,10 @@ void setup() {
   pixels.begin();
   irrecv.enableIRIn();
 
-  for ( int i = 0 ; i < LED_COUNT ; i++) {
+  u8x8.begin();
+  
+
+  for ( int i = 0 ; i < LED_COUNT ; i++) {   //fill all arrays
     hue[i] = 0;
     sat[i] = 0;
     bri[i] = 0;
@@ -56,9 +65,19 @@ void setup() {
 }
 
 void loop() {
+  
+  u8x8.setFont(u8x8_font_chroma48medium8_r);
+  u8x8.setCursor(1, 1);
+  u8x8.print("Programm:");
+  
+  u8x8.setFont(u8x8_font_inr33_3x6_n);
+  u8x8.setCursor(4, 3);
+  u8x8.print(u8x8_u16toa(lastButton, 2));
+  
   animation ( settings[lastButton][0] , settings[lastButton][1] , settings[lastButton][2] , settings[lastButton][3] , settings[lastButton][4] , settings[lastButton][5] , settings[lastButton][6] , settings[lastButton][7] , settings[lastButton][8] , settings[lastButton][9] , settings[lastButton][10] , settings[lastButton][11] , settings[lastButton][12] , settings[lastButton][13] );
 
-  if (irrecv.decode(&results)) {
+  if (irrecv.decode(&results)) {   //check if IR signal send
+    
     translateIR();
     irrecv.resume();
   }
@@ -80,18 +99,14 @@ void loop() {
 
 
 
-
-
-
-
 /*
    function : animation()
 
               animation (
                          hue_start ,               : the starting hue (0-65536)                                                               ┐
                          hue_change ,              : the hue change (0 : no change , e.g. 10000)                                              │
-                         hue_static ,              : should the colors be static (true) or should they move (false)?                          │
-                         hue_static_delete ,       : should all static pixels move away (true) or should they get overpainted (false)?        │
+                         hue_static ,              : should the colors be static (1) or should they move (0)?                                 │
+                         hue_static_delete ,       : should all static pixels move away (1) or should they get overpainted (0)?               │
                          saturation_start ,        : the starting saturation (0-255)                                                          ┤
                          brightness_start ,        : the starting brightness (0-255)                                                          ┘
                          hue_background ,          : the background hue (0-65536)                                                             ┐
@@ -103,6 +118,9 @@ void loop() {
                          delay_time ,              : the delay (1000 = 1s) between the tics (e.g. 10)
                          runs ,                    : how many active pixels should spawn (e.g. 30)
                         )
+                        
+              examples are below the function!
+            
 */
 
 
@@ -171,6 +189,18 @@ void animation ( int hue_start , int hue_change , int hue_static , int hue_stati
 }
 
 
+
+/*
+ *    examples : 
+ *               animation (    0,     0, 0, 0, 255, 255,    0, 255,  0,   1,   1,  1, 10, 300 );   //loads all pixels with red
+ *    
+ * 
+ * 
+ * 
+ * 
+ * 
+ */
+ 
 
 
 
